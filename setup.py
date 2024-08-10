@@ -5,7 +5,7 @@ DESCRIPTION = 'Logging middleware for Python applications'
 
 # Setting up
 setup(
-    name="logger",
+    name="loggingMiddleware",
     version=VERSION,
     author="Neeraj Varma",
     author_email="neeraj@neurofin.com",

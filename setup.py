@@ -10,9 +10,7 @@ setup(
     author="Neeraj Varma",
     author_email="neeraj@neurofin.com",
     description=DESCRIPTION,
-    long_description=open('README.md').read(),
-    long_description_content_type='text/markdown',
-    url='https://github.com/username/repository',  # Replace with your repo URL
+    url='https://github.com/Neurofin/logging-middleware',  # Replace with your repo URL
     packages=find_packages(),
     install_requires=[
         'fastapi',      # FastAPI framework

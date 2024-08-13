@@ -9,10 +9,9 @@ import asyncio
 from datetime import datetime, timezone
 
 class LoggingMiddleware(BaseHTTPMiddleware):
-    def __init__(self, app: ASGIApp):
+    def __init__(self, app: ASGIApp, service_name: str):
         super().__init__(app)
-        self.log_service_url = os.getenv("LOG_SERVICE_URL")
-        self.service_name = os.getenv("SERVICE_NAME", "default_service")
+        self.log_service_url = os.getenv("LOG_SERVICE_URL") + "/log"
         if not self.log_service_url:
             print("LOG_SERVICE_URL is not set")
 
@@ -48,7 +47,7 @@ class LoggingMiddleware(BaseHTTPMiddleware):
 
         # Prepare the request log structure
         request_log_data = {
-            "service": "querier",
+            "service": self.service_name,
             "stage": "START",  # or "development" depending on your environment
             "type": "API",
             "data": request_log,
@@ -92,7 +91,7 @@ class LoggingMiddleware(BaseHTTPMiddleware):
 
         # Prepare the response log structure
         response_log_data = {
-            "service": "querier",
+            "service": self.service_name,
             "stage": "END",  # or "development" depending on your environment
             "type": "API",
             "data": response_log,

@@ -13,8 +13,8 @@ class LoggingMiddleware(BaseHTTPMiddleware):
         super().__init__(app)
         self.log_service_url = os.getenv("LOG_SERVICE_URL") + "/log"
         self.service_name = service_name
-        if not self.log_service_url:
-            print("LOG_SERVICE_URL is not set")
+        print(f"Initialized LoggingMiddleware with service_name: {self.service_name}")
+        print(f"LOG_SERVICE_URL is not set: {self.log_service_url}")
 
     async def dispatch(self, request: Request, call_next):
         start_time = time.time()
@@ -49,7 +49,7 @@ class LoggingMiddleware(BaseHTTPMiddleware):
         # Prepare the request log structure
         request_log_data = {
             "service": self.service_name,
-            "stage": "START",  # or "development" depending on your environment
+            "stage": "START",  
             "type": "API",
             "data": request_log,
             "traceId": traceId,
@@ -93,7 +93,7 @@ class LoggingMiddleware(BaseHTTPMiddleware):
         # Prepare the response log structure
         response_log_data = {
             "service": self.service_name,
-            "stage": "END",  # or "development" depending on your environment
+            "stage": "END",  
             "type": "API",
             "data": response_log,
             "traceId": traceId,

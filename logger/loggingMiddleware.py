@@ -12,6 +12,7 @@ class LoggingMiddleware(BaseHTTPMiddleware):
     def __init__(self, app: ASGIApp, service_name: str):
         super().__init__(app)
         self.log_service_url = os.getenv("LOG_SERVICE_URL") + "/log"
+        self.service_name = service_name
         if not self.log_service_url:
             print("LOG_SERVICE_URL is not set")
 

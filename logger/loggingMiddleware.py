@@ -102,7 +102,5 @@ class LoggingMiddleware(BaseHTTPMiddleware):
         async with httpx.AsyncClient() as client:
             try:
                 response = await client.post(self.log_service_url, json=log_data)
-                if response.status_code != 200:
-                    print(f"Log service returned status code {response.text}")
             except Exception as e:
                 print(f"Error posting log data: {e}")

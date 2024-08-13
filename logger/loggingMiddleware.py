@@ -13,26 +13,20 @@ class LoggingMiddleware(BaseHTTPMiddleware):
         super().__init__(app)
         self.log_service_url = os.getenv("LOG_SERVICE_URL") + "/log"
         self.service_name = service_name
-        print(f"Initialized LoggingMiddleware with service_name: {self.service_name}")
-        print(f"LOG_SERVICE_URL is not set: {self.log_service_url}")
 
     async def dispatch(self, request: Request, call_next):
         start_time = time.time()
 
-        # Generate traceId if not present
         traceId = request.headers.get("traceId")
         if traceId is None:
             traceId = str(uuid.uuid4())
         request.state.traceId = traceId
 
-        # Capture the request body asynchronously
         request_body = await request.body()
         request_body_str = request_body.decode('utf-8')
 
-        # Record the start time in a string format
         start_time_str = datetime.fromtimestamp(start_time, tz=timezone.utc).isoformat(timespec='seconds') 
 
-        # Prepare the request log data
         request_log = {
             "traceId": traceId,
             "remote_ip": request.client.host,
@@ -46,7 +40,6 @@ class LoggingMiddleware(BaseHTTPMiddleware):
             "timestamp": datetime.now(timezone.utc).isoformat(timespec='seconds') 
         }
 
-        # Prepare the request log structure
         request_log_data = {
             "service": self.service_name,
             "stage": "START",  
@@ -56,29 +49,23 @@ class LoggingMiddleware(BaseHTTPMiddleware):
             "timestamp": datetime.now(timezone.utc).isoformat(timespec='seconds') 
         }
 
-        # Send the request log asynchronously
         if self.log_service_url:
             asyncio.create_task(self.send_log(request_log_data))
         else:
             print("Log service URL is missing")
 
-        # Call the next middleware or request handler
         response = await call_next(request)
 
-        # Capture the response body asynchronously
         response_body = b""
         async for chunk in response.body_iterator:
             response_body += chunk
 
-        # Measure the time taken
         end_time = time.time()
         duration = end_time - start_time
         end_time_str = datetime.fromtimestamp(end_time, tz=timezone.utc).isoformat()
 
-        # Prepare the response log data
         end_time_str = datetime.fromtimestamp(end_time, tz=timezone.utc).isoformat(timespec='seconds') 
 
-        # Prepare the response log data
         response_log = {
             "traceId": traceId,
             "status": response.status_code,
@@ -90,7 +77,6 @@ class LoggingMiddleware(BaseHTTPMiddleware):
             "timestamp": datetime.now(timezone.utc).isoformat(timespec='seconds') 
         }
 
-        # Prepare the response log structure
         response_log_data = {
             "service": self.service_name,
             "stage": "END",  
@@ -100,13 +86,11 @@ class LoggingMiddleware(BaseHTTPMiddleware):
             "timestamp": datetime.now(timezone.utc).isoformat(timespec='seconds')
         }
 
-        # Send the response log asynchronously
         if self.log_service_url:
             asyncio.create_task(self.send_log(response_log_data))
         else:
             print("Log service URL is missing")
 
-        # Return the original response
         return Response(
             content=response_body,
             status_code=response.status_code,

@@ -22,19 +22,22 @@ class LoggingMiddleware(BaseHTTPMiddleware):
             traceId = str(uuid.uuid4())
         request.state.traceId = traceId
 
-        request_body = await request.body()
-        request_body_str = request_body.decode('utf-8')
+        try:
+            request_body = await request.body()
+            request_body_str = request_body.decode('utf-8')
+        except Exception:
+            request_body_str = None
 
         start_time_str = datetime.fromtimestamp(start_time, tz=timezone.utc).isoformat(timespec='seconds') 
 
         request_log = {
             "traceId": traceId,
-            "remote_ip": request.client.host,
+            "remote_ip": getattr(request.client, 'host', None),
             "host": request.url.hostname,
             "method": request.method,
             "uri": str(request.url.path),
             "user_agent": request.headers.get("User-Agent"),
-            "requestHeaders": dict(request.headers),
+            "requestHeaders": dict(request.headers) if request.headers else None,
             "requestBody": request_body_str,
             "startTime": start_time_str,
             "timestamp": datetime.now(timezone.utc).isoformat(timespec='seconds') 
@@ -57,20 +60,21 @@ class LoggingMiddleware(BaseHTTPMiddleware):
         response = await call_next(request)
 
         response_body = b""
-        async for chunk in response.body_iterator:
-            response_body += chunk
+        try:
+            async for chunk in response.body_iterator:
+                response_body += chunk
+        except Exception:
+            response_body = b""
 
         end_time = time.time()
         duration = end_time - start_time
-        end_time_str = datetime.fromtimestamp(end_time, tz=timezone.utc).isoformat()
-
         end_time_str = datetime.fromtimestamp(end_time, tz=timezone.utc).isoformat(timespec='seconds') 
 
         response_log = {
             "traceId": traceId,
             "status": response.status_code,
-            "responseHeaders": dict(response.headers),
-            "responseBody": response_body.decode('utf-8'),
+            "responseHeaders": dict(response.headers) if response.headers else None,
+            "responseBody": response_body.decode('utf-8', errors='ignore'),
             "startTime": start_time_str,
             "endTime": end_time_str,
             "latency": f"{duration:.6f} seconds",

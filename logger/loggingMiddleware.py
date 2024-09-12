@@ -102,5 +102,12 @@ class LoggingMiddleware(BaseHTTPMiddleware):
         async with httpx.AsyncClient() as client:
             try:
                 response = await client.post(self.log_service_url, json=log_data)
+            except httpx.HTTPStatusError as http_err:
+                print(
+                    f"HTTP error occurred while posting log data: {http_err.response.status_code} "
+                    f"({http_err.response.reason_phrase}) - {http_err.response.text}"
+                )
+            except httpx.RequestError as req_err:
+                print(f"Request error occurred while posting log data: {str(req_err)}")
             except Exception as e:
-                print(f"Error posting log data: {e}")
+                print(f"Unexpected error posting log data: {str(e)}")

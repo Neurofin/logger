@@ -78,12 +78,12 @@ class LoggingMiddleware(BaseHTTPMiddleware):
             "startTime": start_time_str,
             "endTime": end_time_str,
             "latency": f"{duration:.6f} seconds",
-            "timestamp": datetime.now(timezone.utc).isoformat(timespec='seconds') 
+            "timestamp": datetime.now(timezone.utc).isoformat(timespec='seconds')
         }
 
         response_log_data = {
             "service": self.service_name,
-            "stage": "END",  
+            "stage": "END",
             "type": "API",
             "data": response_log,
             "traceId": traceId,
